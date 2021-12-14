@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ESP-01</title>
+    <meta name="viewport" charset="UTF-8" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/x-icon" href="idea.ico">
+    <script>
+      let status = false
+      setInterval(function ( ) {
+        let xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+            // console.log(this.responseText)
+            let arr = this.responseText.split(",")
+            if(arr.length ===2)
+            {
+              document.getElementById("lux").innerHTML = arr[0];
+              if(arr[1]=='0')
+              {
+                document.getElementById("status").innerHTML ="ESP-01 OFFLINE"
+                status = false
+                document.getElementById('lamp').innerText = "OFF ĐÈN"
+                document.getElementById('lamp').style.backgroundColor ="#E25822"
+                document.getElementById('mode').innerText = "OFF AUTO"
+                document.getElementById('mode').style.backgroundColor ="#E25822"
+              
+              }
+              else
+              {
+                document.getElementById("status").innerHTML ="ESP-01 ONLINE"
+                status = true
+              }
+            }
+            else
+            {
+              
+              if(arr[0]=='0')
+              {
+                document.getElementById('lamp').innerText = "OFF ĐÈN"
+                document.getElementById('lamp').style.backgroundColor ="#E25822"
+              }
+              else{
+                document.getElementById('lamp').innerText = "ON ĐÈN"
+                document.getElementById('lamp').style.backgroundColor ="#5cb85c"
+              }
+              if(arr[1]=='0')
+              {
+                document.getElementById('mode').innerText = "OFF AUTO"
+                document.getElementById('mode').style.backgroundColor ="#E25822"
+                document.getElementById('lamp').style.display ="block"
+              }
+              else{
+                document.getElementById('mode').innerText = "ON AUTO"
+                document.getElementById('mode').style.backgroundColor ="#5cb85c"
+                document.getElementById('lamp').style.display ="none"
+              }
+              document.getElementById("low_range").innerHTML = arr[2]
+              document.getElementById("high_range").innerHTML = arr[3]
+              if(arr[4]=='0')
+              {
+                document.getElementById("status").innerHTML ="ESP-01 OFFLINE"
+                status = false
+                // document.getElementById('lamp').innerText = "OFF ĐÈN"
+                // document.getElementById('lamp').style.backgroundColor ="#E25822"
+                // document.getElementById('mode').innerText = "OFF AUTO"
+                // document.getElementById('mode').style.backgroundColor ="#E25822"
+              
+              }
+              else
+              {
+                document.getElementById("status").innerHTML ="ESP-01 ONLINE"
+                status = true
+              }
+            }
+            
+            
+            // DisplayCurrentTime()
+            
+          }
+        };
+        xhttp.open("GET", "/data", true);
+        xhttp.send();
+        
+      }, 2000 ) ;
+      function onLoadDt(){
+        console.log("on load page!")
+        let xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+            
+            let arr = this.responseText.split(",")
+            if(arr[0]=='0')
+            {
+              document.getElementById('lamp').innerText = "OFF ĐÈN"
+              document.getElementById('lamp').style.backgroundColor ="#E25822"
+            }
+            else{
+              document.getElementById('lamp').innerText = "ON ĐÈN"
+              document.getElementById('lamp').style.backgroundColor ="#5cb85c"
+            }
+            if(arr[1]=='0')
+            {
+              document.getElementById('mode').innerText = "OFF AUTO"
+              document.getElementById('mode').style.backgroundColor ="#E25822"
+            }
+            else{
+              document.getElementById('mode').innerText = "ON AUTO"
+              document.getElementById('mode').style.backgroundColor ="#5cb85c"
+            }
+            document.getElementById("low_range").innerHTML = arr[2]
+            document.getElementById("high_range").innerHTML = arr[3]
+            
+          }
+        };
+        xhttp.open("GET", "/init", true);
+        xhttp.send();
+      }
+
+      //event lamp click
+      function onLamp(){
+        if(status === false)
+        {
+          return alert("Vui lòng kết nối ESP-01!")
+        }
+        let xhttp = new XMLHttpRequest();
+        let label = document.getElementById("lamp").textContent;
+        let cmd=""
+        if(label==="OFF ĐÈN")
+        {
+            cmd = "/onlamp"
+        }
+        else
+        {
+            cmd="/offlamp"
+        }
+        xhttp.onreadystatechange = function(){
+            if(this.readyState == 4 && this.status ==200)
+            {
+                console.log("send done")
+                // label = document.getElementById("start").textContent;
+                
+                if(label === "OFF ĐÈN")
+                {
+                    document.getElementById('lamp').innerText = "ON ĐÈN"
+                    document.getElementById('lamp').style.backgroundColor ="#5cb85c"
+                
+                }
+                else
+                {
+                    document.getElementById('lamp').innerText = "OFF ĐÈN"
+                    document.getElementById('lamp').style.backgroundColor ="#E25822"
+                }
+                
+            }
+            else if(this.readyState == 4 && this.status !==200)
+            {
+               return alert("Mất kết nối! Vui lòng thử lại")
+            }
+           
+        }
+        xhttp.open("GET",cmd,true)
+        xhttp.send()
+        
+      }
+
+       //event mode click
+       function onMode(){
+        if(status === false)
+        {
+          return alert("Vui lòng kết nối ESP-01!")
+        }
+        let xhttp = new XMLHttpRequest();
+        let label = document.getElementById("mode").textContent;
+        let cmd=""
+        if(label==="OFF AUTO")
+        {
+            cmd = "/onauto"
+        }
+        else
+        {
+            cmd="/offauto"
+        }
+        xhttp.onreadystatechange = function(){
+            if(this.readyState == 4 && this.status ==200)
+            {
+                console.log("send done")
+                // label = document.getElementById("start").textContent;
+                
+                if(label === "OFF AUTO")
+                {
+                    document.getElementById('mode').innerText = "ON AUTO"
+                    document.getElementById('mode').style.backgroundColor ="#5cb85c"
+                    document.getElementById('lamp').style.display ="none"
+                
+                }
+                else
+                {
+                    document.getElementById('mode').innerText = "OFF AUTO"
+                    document.getElementById('mode').style.backgroundColor ="#E25822"
+                    document.getElementById('lamp').style.display ="block"
+                }
+                
+            }
+            else if(this.readyState == 4 && this.status !==200)
+            {
+               return alert("Mất kết nối! Vui lòng thử lại")
+            }
+           
+        }
+        xhttp.open("GET",cmd,true)
+        xhttp.send()
+        
+      }
+
+      //event low clicked
+      function onLowSetting(){
+        if(status === false)
+        {
+          return alert("Vui lòng kết nối ESP-01!")
+        }
+        let low = parseInt(document.getElementById("low_range").textContent);
+        let high = parseInt(document.getElementById("high_range").textContent);
+        // console.log(low,high)
+        // let text= ""
+        let val = prompt("Nhập ngưỡng cường độ ánh sáng dưới:",low)
+        // console.log(val)
+        if(val!==null)
+        {
+            let dt = parseInt(val)
+            console.log(dt)
+            if(isNaN(dt))
+            {
+                return alert("Vui lòng nhập số!")
+            }
+            if(dt>=high)
+            {
+                return alert("Ngưỡng cường độ ánh sáng dưới phải thấp  "+high +"  lux")
+            }
+
+            let xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function(){
+                if(this.readyState == 4 && this.status ==200)
+                {
+                    console.log("send done low")
+                    document.getElementById('low_range').innerText = val
+                    document.getElementById('low_range').blur()
+                }
+                else if(this.readyState == 4 && this.status !==200)
+                {
+                   document.getElementById('low_range').blur()
+                   return  alert("Mất kết nối! Vui lòng thử lại")
+                }
+            
+            }
+            xhttp.open("GET","/setting_low/?val="+val,true)
+            xhttp.send()
+            
+        }
+      }
+
+    //event high clicked
+    function onHighSetting(){
+        if(status === false)
+        {
+          return alert("Vui lòng kết nối ESP-01!")
+        }
+        let low = parseInt(document.getElementById("low_range").textContent);
+        let high = parseInt(document.getElementById("high_range").textContent);
+        // console.log(low,high)
+        // let text= ""
+        let val = prompt("Nhập ngưỡng cường độ ánh sáng trên :",high)
+        // console.log(val)
+        if(val!==null)
+        {
+            let dt = parseInt(val)
+            // console.log(dt)
+            if(isNaN(dt))
+            {
+                return alert("Vui lòng nhập số! ")
+            }
+            if(dt<=low)
+            {
+                return alert("Ngưỡng cường độ ánh sáng trên phải cao hơn "+low +" lux")
+            }
+
+            let xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function(){
+                if(this.readyState == 4 && this.status ==200)
+                {
+                    console.log("send done high")
+                    document.getElementById('high_range').innerText = val
+                    document.getElementById('high_range').blur()
+                }
+                else if(this.readyState == 4 && this.status !==200)
+                {
+                    document.getElementById('high_range').blur()
+                    alert("Mất kết nối! Vui lòng thử lại")
+                }
+            
+            }
+            xhttp.open("GET","/setting_high/?val="+val,true)
+            xhttp.send()
+            
+        }
+    }
+      
+    </script>
+    <style>
+      body {
+        text-align: center;
+        font-family: sans-serif;
+        width:80%;
+          margin-left:auto;
+          margin-right:auto;
+          color: #545FDB;
+      }
+      h3,h4{
+        color: #545FDB;
+      }
+      .container{
+        border:3px solid #545FDB;
+        padding-bottom: 10px;
+        border-radius: 5px;
+      }
+      #start {
+        width: 100%;
+        margin-top: 10px;
+        background-color:  rgba(4, 209, 89,1);
+        border: none;
+        color: white;
+        padding: 16px 40px;
+        border-radius: 5px;
+        font-weight: bold;
+        font-size: 1rem;
+        cursor: pointer;
+        margin-bottom:10px;
+      }
+      #start:hover{
+        background-color:rgba(4, 209, 89,0.5);
+      }
+      .title_pri{
+          font-size: 1rem;
+          font-weight: bold;
+          margin-top:10px;
+          padding: 10px;
+          border-radius:5px;
+          
+      }
+      .title_semi{
+        font-size: 1rem;
+        font-weight: bold;
+        padding: 10px;
+        margin-top:10px;
+        
+      }
+      .group_speed{
+          display: flex;
+          flex-direction: row;
+          justify-content: space-around;
+          margin-top: 10px;
+          /* margin-right: 10px;
+          margin-left: 10px;
+          
+          margin-bottom: 20px; */
+      }
+      .group_speed-item{
+          font-size: 1rem;
+          font-weight: bold;
+          background-color: #E25822;
+          border:none;
+          border-radius: 5px;
+          padding: 10px;
+          width: 40%;
+          color:white;
+          cursor: pointer;
+      }
+      .content_temp{
+          padding:10px 20px;
+          width: 20%;
+          background-color: #FFBE3D;
+          color:white;
+          margin-left: 5px;
+          margin-right: 10px;
+          border-radius: 5px;
+      }
+      .content_temp_setting{
+        padding:10px 20px;
+        width: 20%;
+        background-color: #FFBE3D;;
+        color:white;
+        margin-left: 5px;
+        margin-right: 5px;
+        border-radius: 5px;
+      }
+      .content_temp_setting:hover{
+        background-color: #FFE08A;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body onload="onLoadDt()">
+    
+    <h3 id="status">ESP-01 OFFLINE</h3>
+    <div class="container">
+      <div class="title_pri">ĐIỀU KHIỂN BÓNG ĐÈN</div>
+      <div class ="group_speed" style="border-bottom: 3px solid #545FDB;padding-bottom: 10px;"> 
+          <button class="group_speed-item" onclick="onLamp()" id="lamp">OFF ĐÈN</button>
+          <button class="group_speed-item" onclick="onMode()" id="mode">OFF AUTO</button>
+      </div>
+      <div class="title_pri">ÁNH SÁNG HIỆN TẠI</div>
+      <div class="title_semi " style="border-bottom: 3px solid #545FDB;padding-bottom: 20px;">
+          <span class="content_temp" id="lux">0</span>
+          LUX
+      </div>
+      <!-- <button id="start" onclick="onStart()">ĐÃ TẮT TỰ ĐỘNG</button> -->
+      <div class="title_pri">CÀI ĐẶT ÁNH SÁNG</div>
+      <div class="title_semi">
+          <span class="content_temp_setting" id="low_range" onclick="onLowSetting()">0</span>
+          -
+          <span class="content_temp_setting" id="high_range" onclick="onHighSetting()">0</span>
+          LUX
+      </div>
+    </div>
+    
+  </body>
+</html>

@@ -1,6 +1,6 @@
 const express = require('express')
 const cors = require('cors')
-const PORT = 9900
+const PORT = 3000
 const app = express()
 const db = require('./database')
 app.use(cors())

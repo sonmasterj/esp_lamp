@@ -170,6 +170,7 @@
           return alert("Vui lòng kết nối ESP-01!")
         }
         let xhttp = new XMLHttpRequest();
+        
         let label = document.getElementById("mode").textContent;
         let cmd=""
         if(label==="OFF AUTO")
@@ -210,6 +211,53 @@
         xhttp.open("GET",cmd,true)
         xhttp.send()
         
+      }
+      //event download data
+      function onDownload()
+      {
+        // if(status === false)
+        // {
+        //   return alert("Vui lòng kết nối ESP-01!")
+        // }
+        let xhttp = new XMLHttpRequest();
+        xhttp.responseType='json'
+        let now =Math.floor(new Date().getTime()/1000)
+        xhttp.onreadystatechange = function(){
+            if(this.readyState == 4 && this.status ==200)
+            {
+                console.log("send done")
+                // label = document.getElementById("start").textContent;
+                let dt = xhttp.response
+                console.log(dt.data)
+                let csvContent = dt.data.map(e=>e.join(",")).join("\n")
+                var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                if (navigator.msSaveBlob) { // IE 10+
+                    navigator.msSaveBlob(blob, 'data.csv');
+                } else {
+                    var link = document.createElement("a");
+                    if (link.download !== undefined) { // feature detection
+                        // Browsers that support HTML5 download attribute
+                        var url = URL.createObjectURL(blob);
+                        link.setAttribute("href", url);
+                        link.setAttribute("download", 'data.csv');
+                        link.style.visibility = 'hidden';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    }
+                }
+                
+                
+            }
+            else if(this.readyState == 4 && this.status !==200)
+            {
+               return alert("Mất kết nối! Vui lòng thử lại")
+            }
+           
+        }
+        xhttp.open("GET",'/download_data?val='+now,true)
+        xhttp.send()
+
       }
 
       //event low clicked
@@ -374,6 +422,18 @@
           color:white;
           cursor: pointer;
       }
+      .button_dt{
+          font-size: 1rem;
+          font-weight: bold;
+          background-color: #545FDB;
+          border:none;
+          border-radius: 5px;
+          padding: 10px;
+          color:white;
+          cursor: pointer;
+          width: 100%;
+          margin-top: 20px;
+      }
       .content_temp{
           padding:10px 20px;
           width: 20%;
@@ -421,6 +481,7 @@
           LUX
       </div>
     </div>
+    <button class="button_dt" onclick="onDownload()" id="mode">XUẤT DỮ LIỆU</button>
     
   </body>
 </html>

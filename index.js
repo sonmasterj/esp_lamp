@@ -2,6 +2,7 @@ const express = require('express')
 const cors = require('cors')
 const PORT = 9900
 const app = express()
+const db = require('./database')
 app.use(cors())
 //   Static assets
 app.use('/', express.static('public'))
@@ -14,6 +15,20 @@ let high_setting = 0
 let current_lux =0 
 let state_change = false
 let cnt =0
+let sql_insert = 'INSERT INTO data (time,lux) VALUES (?,?)'
+setInterval(()=>{
+    let time = new Date()
+    if(time.getHours()===0 && time.getMinutes() ==0)
+    {
+        db.run('DELETE FROM data',[],(err,result)=>{
+            if(err){
+                console.log("delete db error:",err)
+                return
+            }
+            console.log("delete success!")
+        })
+    }
+},60*1000)
 app.get('/init',(req,res)=>{
     let result = status_lamp +","+status_auto+","+low_setting+","+high_setting
     res.send(result)
@@ -91,19 +106,46 @@ app.get('/setting_high',(req,res)=>{
 
 //get status from esp
 app.get('/status_esp',(req,res)=>{
-    current_time = new Date().getTime()/1000
+    current_time = Math.floor(new Date().getTime()/1000)
     // status_esp = 1
     let result = status_lamp +","+status_auto+","+low_setting+","+high_setting
     res.send(result) 
 })
+app.get('/download_data',(req,res)=>{
+    let query_time = req.query.val - 60*60
+    // console.log(query_time)
+    let sql_query = "select time,lux from data where time>=?"
+    db.all(sql_query,[query_time],(err,rows)=>{
+        if(err){
+            res.status(400).json({"error":err.message});
+            return
+        }
+        let newDt=[["Time","Lux value"]]
+        rows.forEach(el=>{
+            let _time = new Date(el.time*1000)
+            let str_time = `${_time.getDate()}/${_time.getMonth()+1}/${_time.getFullYear()} ${_time.getHours()}:${_time.getMinutes()}:${_time.getSeconds()}`
+            newDt.push([str_time,el.lux])
+        })
+        res.json({data:newDt})
+    })
 
+})
 //esp controller
 app.get("/lux_esp",(req,res)=>{
     // console.log("lux:",req.query.val)
     // status_esp = 1
-    current_time = new Date().getTime()/1000
+    current_time =Math.floor(new Date().getTime()/1000)
     current_lux = req.query.val
-    res.send("ok")
+    db.run(sql_insert,[current_time,current_lux],(err,result)=>{
+        if(err){
+            console.log(err)
+            res.status(400).send("error add data")
+            return;
+        }
+        res.send('ok')
+    })
+
+    // res.send("ok")
 })
 app.get("/init_esp",(req,res)=>{
     console.log("init from esp:",req.query.val)
